@@ -8,6 +8,8 @@
 
 ### 添加依赖
 
+[Demo工程](https://github.com/jjj124/SpringLimiterDemo)
+
 `**该项目尚未上传到maven中央仓库,所以需要自行clone本项目本地编译**`
 
   pom.xml 添加依赖
