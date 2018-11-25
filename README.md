@@ -62,9 +62,9 @@ public class Application {
 
 ####  一、@HLock 
 
-  假设有这样一个场景，用户可以使用兑换码进行兑换礼品，理所当然的是每个兑换码只能使用一次，那我们就需要在该接口中实现每个充值码能且只能兑换一次，一个通常得做法可能是开发人员需要手动得给这条数据添加一个悲观锁，例如 `select code from code_table where code =#{code} for update`,这样写是非常有必要的，可以防止该接口遭受恶意的攻击。
+  假设有这样一个场景，用户可以使用兑换码进行兑换奖品，理所当然的是每个兑换码只能使用一次，那我们就需要在该接口中实现每个充值码能且只能兑换一次，一个通常得做法可能是开发人员需要手动得给这条数据添加一个悲观锁，例如 `select code from code_table where code =#{code} for update`,这样写是非常有必要的，可以防止该接口遭受恶意的攻击。
 
-  但这样得写法有待商榷，关于锁的开销倒是其次，而开发人员必须时刻提防这些不期而至的恶意攻击，让本来一个简单的逻辑变复杂。现在我们可以声明式的获取这个锁，将“锁”和业务逻辑解离开来。
+  但这样得写法有待商榷，关于锁的开销和死锁隐患倒是其次，而开发人员必须时刻提防这些不期而至的恶意攻击，让业务逻辑变复杂。现在我们可以声明式的获取这个锁，将“锁”的获取和业务逻辑解离开来。
 
  例如：
 
@@ -90,16 +90,16 @@ public class Application {
     }
 ```
 
-  通过`@HLock` 注解为这个接口添加了一个锁，`keys` 中指定了这个锁的键值，显而易见，对于同时到达的、相同`chargeCode`的请求，只会有一个正在被正确处理，而其他得请求将会被降级，而被降级后得请求将会返回什么呢？
+  通过`@HLock` 注解为这个接口添加了一个锁，`keys` 中指定了这个锁的键值，显而易见，对于同时到达的、相同`redeemCode`的请求，只会有一个正在被正确处理，而其他得请求将会被降级，而被降级后得请求将会返回什么呢？
 
-答案就在`fallbackResolver`属性上，实际上 `busyFallback`是一个被Spring 管理得Bean,我们需要先实现`LimiterFallbackResolver`接口来定义接口被降级后得行为，例如本例中
+答案在`fallbackResolver`属性上，实际上 `busyFallback`是一个被Spring 管理得Bean,我们需要先实现`LimiterFallbackResolver`接口来定义接口被降级后得行为，例如本例中
 
 ```java
 public class BusyFallbackResolver implements LimiterFallbackResolver<ResponseMessage> {
     @Override
     public ResponseMessage resolve(Method method, Class<?> aClass, Object[] objects, 		String s) {
         //对于被降级的请求直接返回服务繁忙
-        return ResponseMessage.erroe("服务繁忙");
+        return ResponseMessage.error("服务繁忙");
     }
 }
 
@@ -136,10 +136,10 @@ public LockManager redisLockManager() {
 并在使用`@HLock`注解时选择该LockManager
 
 ```java
- @HLock(keys = "#changeCode", fallbackResolver = "busyFallback",lockManager = "redisLockManager")
+ @HLock(keys = "#redeemCode", fallbackResolver = "busyFallback",lockManager = "redisLockManager")
 ```
 
-同理 使用Jdk锁
+同理 如果使用使用Jdk锁
 
 ```java
 @Bean 
@@ -187,7 +187,7 @@ public ArgumentInjecter injectUser() {
 最后修改`@HLock`来使用
 
 ```java
-@HLock(keys = "#changeCode+#user.userId", fallbackResolver = "busyFallback",lockManager = "redisLockManager",argInjecters = "injectUser")
+@HLock(keys = "#redeemCode+#user.userId", fallbackResolver = "busyFallback",lockManager = "redisLockManager",argInjecters = "injectUser")
 ```
 
 至于keys表达式的形式参考`Spel`的相关资料，此处不再赘述。
@@ -196,7 +196,7 @@ public ArgumentInjecter injectUser() {
 
 #### 二、`@HSemaphore` 
 
-     `@HSemaphore` 注解用来为接口声明一个信号量，可以达到限制并发数得效果
+` @HSemaphore` 注解用来为接口声明一个信号量，可以达到限制并发数的效果，下面的例子中限制同一个用户对于该接口的并发数为5，超过5个的请求将会被降级，同样的该组建提供redis和Jdk两种实现
 
 ```java
 @HSemaphore(keys = "'exchange2'+#user.userId", fallbackResolver = "busyFallback", semaphoreManager = "redisSemaphoreManager",permits = 5, argInjecters = "injectUser")
@@ -219,7 +219,7 @@ public ArgumentInjecter injectUser() {
 
 #### 三 、`@HRateLimiter`
 
-  `@HRateLimiter` 注解用来为接口声明一个速率限制器，限制接口的访问频率
+  `@HRateLimiter` 注解用来为接口声明一个速率限制器，限制接口的访问频率，该组件提供redis和guava两种实现
 
   配置 RateLimiterManager
 
@@ -248,10 +248,11 @@ public RateLimiterManager redisRateLimiterManager() {
     GlobalConfig globalConfig() {
         LimiterGlobalConfig limiterGlobalConfig = new LimiterGlobalConfig();
         // 当组件内遇到异常时是否进行降级，比如使用分布式锁时，
-        // redis 宕机后的降级策略，返回true未不降级，false为降级
+        // redis 宕机后的降级策略，返回true为不降级，false为降级
         limiterGlobalConfig.setErrorHandler(new ErrorHandler() {
             @Override
             public boolean handleError(RuntimeException runtimeException) {
+                // 亦可抛出异常
                 throw runtimeException;
             }
         });
@@ -287,10 +288,10 @@ public RateLimiterManager redisRateLimiterManager() {
   @Bean
 public LockManager jdkLockManager() {
         site.higgs.limiter.lock.support.jdk.Config config = new site.higgs.limiter.lock.support.jdk.Config();
-        config.setSize(2 << 10);// //缓存锁的容量，当内存中存在的锁实例超过该阈值时将会根据LUR清除最近最少用到的锁实例
+        config.setSize(2 << 10);// //缓存锁的容量，当内存中存在的锁实例超过该阈值时将会根据LRU清除最近最少用到的锁实例
         config.setDuration(30);   //在多久没获取该锁时自动解锁
         config.setTimeUnit(TimeUnit.SECONDS);
-        config.setTimerduration(86400000);// //看门狗 多久进行一次大扫除  单位毫秒 主要用来清除最近未使用到的锁 减少内存消耗
+        config.setTimerduration(86400000);// //看门狗  单位毫秒 主要用来清除最近未使用到的锁 减少内存消耗
         return new JdkLockManager();
 }
 ```
@@ -303,7 +304,7 @@ public LockManager jdkLockManager() {
 
 ---
 
-    组件的类图如下，`Limiter`作为一个顶级接口，提供了扩展其他组件的能力
+    组件的类图如下，Limiter作为一个顶级接口，提供了扩展其他组件的能力
 
 ![](https://githubimage.oss-cn-beijing.aliyuncs.com/limiter.jpg)
 
