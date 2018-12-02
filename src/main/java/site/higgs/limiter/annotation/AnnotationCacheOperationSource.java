@@ -1,7 +1,7 @@
 package site.higgs.limiter.annotation;
 
 import org.springframework.util.Assert;
-import site.higgs.limiter.interceptor.AbstractFallbackLimiterOperationSource;
+import site.higgs.limiter.interceptor.AbstractLimiterOperationSource;
 import site.higgs.limiter.interceptor.LimiterOperation;
 import site.higgs.limiter.lock.LockAnnotationParser;
 import java.io.Serializable;
@@ -9,29 +9,16 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 
-public class AnnotationCacheOperationSource extends AbstractFallbackLimiterOperationSource implements Serializable {
+/**
+ * 从注解中获取定义
+ * 参考cache模块
+ */
+public class AnnotationCacheOperationSource extends AbstractLimiterOperationSource implements Serializable {
 
     private final boolean publicMethodsOnly;
 
     private final Set<LimiterAnnotationParser> annotationParsers;
 
-
-    public AnnotationCacheOperationSource() {
-        this(true);
-    }
-
-
-    public AnnotationCacheOperationSource(boolean publicMethodsOnly) {
-        this.publicMethodsOnly = publicMethodsOnly;
-        this.annotationParsers = new LinkedHashSet<>(1);
-        this.annotationParsers.add(new LockAnnotationParser());
-    }
-
-    public AnnotationCacheOperationSource(LimiterAnnotationParser annotationParser) {
-        this.publicMethodsOnly = true;
-        Assert.notNull(annotationParser, "LimiterAnnotationParser must not be null");
-        this.annotationParsers = Collections.singleton(annotationParser);
-    }
 
 
     public AnnotationCacheOperationSource(LimiterAnnotationParser... annotationParsers) {
@@ -51,23 +38,21 @@ public class AnnotationCacheOperationSource extends AbstractFallbackLimiterOpera
 
 
     @Override
-
     protected Collection<LimiterOperation> findLimiterOperations(final Class<?> clazz) {
         return determineCacheOperations(parser -> parser.parseLimiterAnnotations(clazz));
     }
 
     @Override
-
     protected Collection<LimiterOperation> findLimiterOperations(final Method method) {
         return determineCacheOperations(parser -> parser.parseLimiterAnnotations(method));
     }
 
 
 
-    protected Collection<LimiterOperation> determineCacheOperations(CacheOperationProvider provider) {
+    protected Collection<LimiterOperation> determineCacheOperations(LimiterOperationProvider provider) {
         Collection<LimiterOperation> ops = null;
         for (LimiterAnnotationParser annotationParser : this.annotationParsers) {
-            Collection<LimiterOperation> annOps = provider.getCacheOperations(annotationParser);
+            Collection<LimiterOperation> annOps = provider.getLimiterOperations(annotationParser);
             if (annOps != null) {
                 if (ops == null) {
                     ops = new ArrayList<>();
@@ -104,10 +89,9 @@ public class AnnotationCacheOperationSource extends AbstractFallbackLimiterOpera
 
 
     @FunctionalInterface
-    protected interface CacheOperationProvider {
+    protected interface LimiterOperationProvider {
 
-
-        Collection<LimiterOperation> getCacheOperations(LimiterAnnotationParser parser);
+        Collection<LimiterOperation> getLimiterOperations(LimiterAnnotationParser parser);
     }
 
 }

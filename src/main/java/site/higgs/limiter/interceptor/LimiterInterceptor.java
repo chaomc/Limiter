@@ -7,6 +7,9 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 
+/**
+ *
+ */
 public class LimiterInterceptor extends LimiterAspectSupport implements MethodInterceptor, Serializable {
 
     @Override

@@ -21,6 +21,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+/**
+ * 实际的advisor
+ * 使用beanfactory的一些基础设施
+ */
 public abstract class LimiterAspectSupport implements BeanFactoryAware, InitializingBean, SmartInitializingSingleton {
 
     protected final Log logger = LogFactory.getLog(getClass());
@@ -42,10 +46,20 @@ public abstract class LimiterAspectSupport implements BeanFactoryAware, Initiali
     private LimiterOperationSource limiterOperationSource;
 
 
+    /**
+     *
+     * @param invocation
+     * @param target
+     * @param method
+     * @param args
+     * @return
+     * @throws Throwable
+     */
     protected Object execute(final MethodInvocation invocation, Object target, Method method, Object[] args) throws Throwable {
 
         if (this.initialized) {
             Class<?> targetClass = getTargetClass(target);
+            //
             LimiterOperationSource limiterOperationSource = getLimiterOperationSource();
             if (limiterOperationSource != null) {
                 Collection<LimiterOperation> operations = limiterOperationSource.getLimiterOperations(method, targetClass);

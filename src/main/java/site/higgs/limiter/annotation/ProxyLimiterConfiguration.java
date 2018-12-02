@@ -22,8 +22,7 @@ public class ProxyLimiterConfiguration extends AbstractLimiterConfiguration {
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public BeanFactoryLimiterOperationSourceAdvisor limiterAdvisor() {
         BeanFactoryLimiterOperationSourceAdvisor advisor =
-                new BeanFactoryLimiterOperationSourceAdvisor();
-        advisor.setLimiterOperationSource(limiterOperationSource());
+                new BeanFactoryLimiterOperationSourceAdvisor(limiterOperationSource());
         advisor.setAdvice(limiterInterceptor());
         if (this.enableLimiter != null) {
             advisor.setOrder(this.enableLimiter.<Integer>getNumber("order"));

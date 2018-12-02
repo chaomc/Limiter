@@ -7,6 +7,10 @@ import org.springframework.util.ObjectUtils;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+/**
+ * 切点抽象定义
+ * @see BeanFactoryLimiterOperationSourceAdvisor
+ */
 abstract class LimiterOperationSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
     public LimiterOperationSourcePointcut() {

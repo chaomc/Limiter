@@ -14,13 +14,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 
-public abstract class AbstractFallbackLimiterOperationSource implements LimiterOperationSource {
+public abstract class AbstractLimiterOperationSource implements LimiterOperationSource {
 
+    /**
+     * 空集合，应用于没有定义的切点
+     */
     private static final Collection<LimiterOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
     protected final Log logger = LogFactory.getLog(this.getClass());
     private final Map<Object, Collection<LimiterOperation>> attributeCache = new ConcurrentHashMap(1024);
 
-    public AbstractFallbackLimiterOperationSource() {
+    public AbstractLimiterOperationSource() {
     }
 
     @Override
@@ -49,6 +52,7 @@ public abstract class AbstractFallbackLimiterOperationSource implements LimiterO
         if (this.allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
             return null;
         } else {
+            // 对于代理对象 需要获取其实际的方法
             Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
             Collection<LimiterOperation> opDef = this.findLimiterOperations(specificMethod);
             if (opDef != null) {
@@ -85,9 +89,9 @@ public abstract class AbstractFallbackLimiterOperationSource implements LimiterO
     }
 
 
-    protected abstract Collection<LimiterOperation> findLimiterOperations(Method var1);
+    protected abstract Collection<LimiterOperation> findLimiterOperations(Method method);
 
 
-    protected abstract Collection<LimiterOperation> findLimiterOperations(Class<?> var1);
+    protected abstract Collection<LimiterOperation> findLimiterOperations(Class<?> clazz);
 
 }

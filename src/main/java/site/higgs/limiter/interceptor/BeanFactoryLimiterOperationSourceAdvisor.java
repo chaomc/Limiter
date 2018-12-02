@@ -5,11 +5,17 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
 
 
+/**
+ * 实际的切面
+ */
 public class BeanFactoryLimiterOperationSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
 
     private LimiterOperationSource limiterOperationSource;
 
+    /**
+     * 切点
+     */
     private final LimiterOperationSourcePointcut pointcut = new LimiterOperationSourcePointcut() {
         @Override
         protected LimiterOperationSource getLimiterOperationSource() {
@@ -17,18 +23,11 @@ public class BeanFactoryLimiterOperationSourceAdvisor extends AbstractBeanFactor
         }
     };
 
-    public BeanFactoryLimiterOperationSourceAdvisor() {
-    }
-
-
-    public void setLimiterOperationSource(LimiterOperationSource limiterOperationSource) {
+    public BeanFactoryLimiterOperationSourceAdvisor(LimiterOperationSource limiterOperationSource) {
         this.limiterOperationSource = limiterOperationSource;
     }
 
 
-    public void setClassFilter(ClassFilter classFilter) {
-        this.pointcut.setClassFilter(classFilter);
-    }
 
     @Override
     public Pointcut getPointcut() {
