@@ -4,11 +4,14 @@
 
 ### 一个注解使你的SpringBoot项目获得分布式锁和限流器能力
 
+
+
 ----
+最近看到了阿里开源中间件Sentinel,大概了解了一下文档，Sentinel是在服务治理中作为保护应用，防止应用过载的一个中间件，资源的最小粒度是api接口。而该项目是在业务层使用，资源的最小粒度可以深入到方法参数和请求上下文参数(如ip,登录用户)。
 
-### 添加依赖
-
+----
 [Demo工程](https://github.com/jjj124/SpringLimiterDemo)
+### 添加依赖
 
 `**该项目尚未上传到maven中央仓库,所以需要自行clone本项目本地编译**`
 
@@ -72,7 +75,7 @@ public class Application {
 
 ```java
     /**
-     * 限制键为 #redeemCode+#user.userId
+     * 限制键为 #redeemCode
      * 当多个请求同时到达时，只有一个会被正常处理，其他请求会被降级
      * 当正常的请求被处理完毕，锁会释放
      * 值得注意得是keys 本身不会包含方法名，最好前面加前缀同其他接口分开
@@ -80,7 +83,7 @@ public class Application {
      * @return
      */
     @RequestMapping(value = "/exchange", method = RequestMethod.GET)
-    @HLock(keys = "#redeemCode+#user.userId", fallbackResolver = "busyFallback", lockManager = "redisLockManager", argInjecters = "injectUser")
+    @HLock(keys = "#redeemCode", fallbackResolver = "busyFallback", lockManager = "redisLockManager", argInjecters = "injectUser")
     public ResponseMessage exchange(@RequestParam("redeemCode") String redeemCode) {
         try {
             // do something
