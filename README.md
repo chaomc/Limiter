@@ -10,7 +10,7 @@ Limiter是一款注解驱动的，适应于业务层面的分布式限流降级�
 
 <dependency>
 	<groupId>site.higgs.limiter</groupId>
-    <artifactId>limiter-support</artifactId>
+    	<artifactId>limiter-support</artifactId>
 	<version>1.0-SNAPSHOT</version>
 </dependency>
 ```

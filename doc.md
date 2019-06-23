@@ -2,9 +2,9 @@
 
 ## 如何工作的
 
-	Limiter工作的基础是SpringAop，Limiter在容器启动阶段注入拦截器对象，在相应的切点执行限制器。Api业务逻辑被limiter环绕，只有所有的limiter锁定相应的资源后，业务逻辑才会执行。
+     Limiter工作的基础是SpringAop，Limiter在容器启动阶段注入拦截器对象，在相应的切点执行限制器。Api业务逻辑被limiter环绕，只有所有的limiter锁定相应的资源后，业务逻辑才会执行。
 
-![工作逻辑](https://githubimage.oss-cn-beijing.aliyuncs.com/doc1.jpg)
+![工作逻辑](https://githubimage.oss-cn-beijing.aliyuncs.com/docimage)
 
 
 
