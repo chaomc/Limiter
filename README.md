@@ -62,7 +62,7 @@ public ResponseMessage exchangeVip(@RequestBody ExchangeVipRequest request) {
 
 **Step 2.添加`HLock`注解**
 
-  上面的接口并不安全，假如在极短的的时间内用户发起了多次相同兑换的请求，由于数据库的事务隔离特性，该兑换码便会被多次兑换，这个漏洞可能被用户恶意使用，造成损失。  这里涉及的重放攻击问题此处不再深入讨论,(欢迎移步我的[博客](https://blog.higgs.site/2019/06/24/从接口幂等性到重放攻击/#more))。现在我们添加HLock注解保护该接口。
+  上面的接口并不安全，假如在极短的的时间内用户发起了多次相同兑换的请求，由于数据库的事务隔离特性，该兑换码便会被多次兑换，这个漏洞可能被用户恶意使用，造成损失。  这里涉及的重放攻击问题此处不再深入讨论,(欢迎移步我的[博客](https://blog.higgs.site/2019/06/24/从接口幂等性到重放攻击/#))。现在我们添加HLock注解保护该接口。
 
 ```java
 @RequestMapping(method = RequestMethod.POST, value = "/exchangeVip")
