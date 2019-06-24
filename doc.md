@@ -2,9 +2,9 @@
 
 ## 如何工作的
 
-     Limiter工作的基础是SpringAop，Limiter在容器启动阶段注入拦截器对象，在相应的切点执行限制器。Api业务逻辑被limiter环绕，只有所有的limiter锁定相应的资源后，业务逻辑才会执行。
+   Limiter工作的基础是SpringAop，Limiter在容器启动阶段注入拦截器对象，在相应的切点执行限制器。Api业务逻辑被limiter环绕，只有所有的limiter锁定相应的资源后，业务逻辑才会执行。
 
-![工作逻辑](https://githubimage.oss-cn-beijing.aliyuncs.com/docimage)
+![工作逻辑](https://oss.higgs.site/doc1.jpg)
 
 
 
@@ -63,7 +63,7 @@ public abstract class Lock implements Limiter<HLock> {
 
 ### 2. RateLimiter
 
-	频率限制器，用于限制某一资源的访问频率，抽象接口为`site.higgs.limiter.ratelimiter.RateLimiter`，对应的注解为`HRateLimiter`
+频率限制器，用于限制某一资源的访问频率，抽象接口为`site.higgs.limiter.ratelimiter.RateLimiter`，对应的注解为`HRateLimiter`
 
 ```java
 public abstract class RateLimiter implements Limiter<HRateLimiter> {
@@ -128,7 +128,7 @@ public abstract class PeakLimiter implements Limiter<HPeak> {
 
 ###  1. 注解通用基础属性
 
-	所有类型的注解都默认包含下面5个属性
+所有类型的注解都默认包含下面5个属性
 
 - **limiter** : 使用的限流器的BeanId,将会从Spring的BeanFacotry中获取，不能为空。
   例如：设置limiter="jdkLock" 便会使用该限流组件
