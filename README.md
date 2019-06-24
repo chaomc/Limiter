@@ -124,7 +124,7 @@ ResponseMessage fallbackToBusy(ExchangeVipRequest request) {
 
 - [详细文档](./doc.md)
 
-- [Demo](https://github.com/jjj124/SpringLimiterDemo)
+- [Demo](https://github.com/jjj124/limtierDemo)
 
 
 ## FAQ
